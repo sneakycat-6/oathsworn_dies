@@ -7,7 +7,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;700;900&display=swap');
 
-        /* GŁÓWNE STYLE */
         :root {
             --bg-deep: #0c0a09;
             --bg-card: #1c1917;
@@ -29,7 +28,7 @@
         }
 
         .container {
-            max-width: 1200px; /* Rozszerzono kontener, aby pomieścił kolumny */
+            max-width: 1200px;
             width: 100%;
         }
 
@@ -40,7 +39,7 @@
             letter-spacing: 4px;
             border-bottom: 1px solid var(--zinc-700);
             padding-bottom: 10px;
-            margin-bottom: 5px;
+            margin: 0 0 5px 0;
         }
 
         .subtitle {
@@ -52,15 +51,29 @@
             letter-spacing: 2px;
         }
 
-        /* PANEL STEROWANIA */
-        .stats-grid {
+        /* ------------------------------------------------------- */
+        /* NOWY GÓRNY PANEL KONFIGURACJI                           */
+        /* ------------------------------------------------------- */
+        .top-config-panel {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 1fr 1.5fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            background: rgba(28, 25, 23, 0.4);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid var(--zinc-700);
+        }
+
+        @media (max-width: 900px) {
+            .top-config-panel { grid-template-columns: 1fr; }
+        }
+
+        /* Parametry główne (Cel, Tokeny) */
+        .params-grid {
+            display: grid;
+            grid-template-columns: 1fr;
             gap: 10px;
-            margin-bottom: 20px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
         .stat-box {
@@ -90,34 +103,72 @@
             font-family: 'Cinzel', serif;
         }
 
-        .deck-main-header {
+        /* Limity kart (Przeniesione na górę) */
+        .limits-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .limit-item {
+            background: rgba(0,0,0,0.2);
+            padding: 8px 12px;
+            border-radius: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            font-size: 12px;
-            text-transform: uppercase;
-            font-family: 'Cinzel', serif;
-            border-bottom: 1px solid #292524;
-            padding-bottom: 5px;
+            border: 1px solid #292524;
         }
 
-        /* ------------------------------------------------------- */
-        /* NOWY UKŁAD SIATKI DLA TALII (2 KOLUMNY, 2 RZĘDY)        */
-        /* ------------------------------------------------------- */
+        .limit-item span { font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .limit-item input {
+            width: 40px;
+            background: #000;
+            border: 1px solid var(--zinc-700);
+            color: white;
+            text-align: center;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        /* PRZYCISK OBLICZ */
+        .calc-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .btn-main {
+            width: 100%;
+            height: 100%;
+            min-height: 80px;
+            background: linear-gradient(to bottom, #d97706, #b45309);
+            color: #0c0a09;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 900;
+            border-radius: 15px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 2px;
+            box-shadow: 0 0 20px rgba(217, 119, 6, 0.15);
+            transition: 0.3s;
+        }
+
+        .btn-main:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .btn-main:active { transform: translateY(0); }
+
+        /* ZARZĄDZANIE TALIĄ */
         .decks-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 40px;
         }
 
-        /* Responsywność: na małych ekranach (telefonach) wraca do 1 kolumny */
         @media (max-width: 768px) {
-            .decks-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
+            .decks-grid { grid-template-columns: 1fr; }
         }
 
         .deck-section {
@@ -125,7 +176,6 @@
             border: 1px solid #292524;
             border-radius: 15px;
             padding: 15px;
-            height: auto;
         }
 
         .deck-header {
@@ -136,15 +186,12 @@
             font-size: 11px;
             text-transform: uppercase;
             font-family: 'Cinzel', serif;
+            border-bottom: 1px solid #292524;
+            padding-bottom: 5px;
         }
 
-        .card-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
+        .card-grid { display: flex; flex-wrap: wrap; gap: 8px; }
 
-        /* STYL KARTY */
         .oath-card {
             width: 52px;
             height: 75px;
@@ -174,119 +221,33 @@
 
         .oath-card.is-discarded::after {
             content: '☠';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #ef4444;
-            font-size: 20px;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #ef4444; font-size: 20px;
         }
-
-        /* LIMITY DOBORU I PRZYCISKI - ZGRUPOWANE NA DOLE */
-        .bottom-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            max-width: 800px;
-            margin: 0 auto 30px auto;
-        }
-
-        @media (max-width: 768px) {
-            .bottom-layout {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-        }
-
-        .limits-box {
-            background: #171717;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #262626;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .limit-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 12px;
-        }
-
-        .limit-row:last-child { margin-bottom: 0; }
-
-        .limit-row input {
-            width: 50px;
-            background: #262626;
-            border: 1px solid #404040;
-            color: white;
-            padding: 4px;
-            text-align: center;
-            border-radius: 5px;
-        }
-
-        .action-box {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .btn-main {
-            width: 100%;
-            height: 100%;
-            min-height: 60px;
-            background: linear-gradient(to right, #b45309, #d97706);
-            color: #0c0a09;
-            border: none;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: 900;
-            border-radius: 12px;
-            cursor: pointer;
-            font-family: 'Cinzel', serif;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.2);
-        }
-
-        .btn-main:active { transform: scale(0.98); }
 
         .btn-reset {
-            background: #450a0a;
-            color: #fca5a5;
-            border: 1px solid #7f1d1d;
-            padding: 4px 10px;
-            border-radius: 5px;
-            font-size: 9px;
-            cursor: pointer;
+            background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d;
+            padding: 6px 12px; border-radius: 6px; font-size: 10px; cursor: pointer;
+            text-transform: uppercase; font-family: 'Cinzel', serif;
         }
 
-        /* WYNIKI */
+        /* PANEL WYNIKÓW */
         .result-box {
             background: #064e3b;
             border: 2px solid var(--emerald);
-            padding: 20px;
-            border-radius: 15px;
+            padding: 25px;
+            border-radius: 20px;
             text-align: center;
             display: none;
-            max-width: 600px;
-            margin: 0 auto 40px auto;
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+            max-width: 700px;
+            margin: 0 auto 50px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .result-title { font-size: 10px; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
-        .result-combo { font-size: 22px; font-weight: 900; color: var(--amber); margin-bottom: 15px; font-family: 'Cinzel', serif; }
-        
-        .result-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .res-val { font-size: 24px; font-weight: 900; display: block; }
-        .res-lbl { font-size: 9px; text-transform: uppercase; opacity: 0.7; }
+        .result-combo { font-size: 24px; font-weight: 900; color: var(--amber); margin-bottom: 15px; font-family: 'Cinzel', serif; }
+        .result-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .res-val { font-size: 28px; font-weight: 900; display: block; }
+        .res-lbl { font-size: 10px; text-transform: uppercase; opacity: 0.7; }
 
     </style>
 </head>
@@ -296,55 +257,49 @@
     <h1>OATHSWORN</h1>
     <div class="subtitle">Tactical Deepwood Companion</div>
 
-    <!-- PANEL PARAMETRÓW -->
-    <div class="stats-grid">
-        <div class="stat-box">
-            <div class="stat-label">Cel (X)</div>
-            <input type="number" id="targetX" value="6">
+    <div class="top-config-panel">
+        <div class="params-grid">
+            <div class="stat-box">
+                <div class="stat-label">Cel (X)</div>
+                <input type="number" id="targetX" value="6">
+            </div>
+            <div class="stat-box" style="border-color: var(--purple)">
+                <div class="stat-label" style="color:var(--purple)">⭐ Upgrady</div>
+                <input type="number" id="upgrade_tokens" value="1" style="color:var(--purple)">
+            </div>
+            <div class="stat-box" style="border-color: #f97316">
+                <div class="stat-label" style="color:#f97316">🔄 Wymiany</div>
+                <input type="number" id="swap_tokens" value="1" style="color:#f97316">
+            </div>
         </div>
-        <div class="stat-box">
-            <div class="stat-label">Upgrady ⭐</div>
-            <input type="number" id="upgrade_tokens" value="1">
+
+        <div class="limits-grid">
+            <div class="limit-item"><span>Max Białych</span> <input type="number" id="max_white" value="5"></div>
+            <div class="limit-item" style="border-color: var(--amber)"><span style="color:var(--amber)">Żółte Bazy</span> <input type="number" id="base_yellow" value="0"></div>
+            <div class="limit-item" style="border-color: var(--red)"><span style="color:var(--red)">Czerwone Bazy</span> <input type="number" id="base_red" value="0"></div>
+            <div class="limit-item" style="border-color: #71717a"><span style="color:#71717a">Czarne Bazy</span> <input type="number" id="base_black" value="0"></div>
+            <div style="grid-column: span 2; text-align: center; margin-top: 10px;">
+                <button class="btn-reset" onclick="resetAllDiscards()" style="width: 100%">WTASUJ WSZYSTKIE KARTY (RESET)</button>
+            </div>
         </div>
-        <div class="stat-box">
-            <div class="stat-label">Wymiany 🔄</div>
-            <input type="number" id="swap_tokens" value="1">
+
+        <div class="calc-area">
+            <button class="btn-main" onclick="optimizeDraw()">PRZEWIDŹ LOS<br>(OBLICZ)</button>
         </div>
     </div>
 
-    <!-- NAGŁÓWEK SEKCJI TALII -->
-    <div class="deck-main-header">
-        <span>🔮 Zarządzanie taliami</span>
-        <button class="btn-reset" onclick="resetAllDiscards()">PRZETASUJ WSZYSTKO</button>
-    </div>
-
-    <!-- SIATKA TALII (KOD GENERUJE JE W GENERATORZE) -->
-    <div id="deck-selectors" class="decks-grid"></div>
-
-    <!-- DOLNY UKŁAD: LIMIT DOBORU + PRZYCISK OBLICZ -->
-    <div class="bottom-layout">
-        <div class="limits-box">
-            <div class="limit-row"><span>Maksimum Białych:</span> <input type="number" id="max_white" value="5"></div>
-            <div class="limit-row"><span style="color:var(--amber)">Żółte Bazy:</span> <input type="number" id="base_yellow" value="0"></div>
-            <div class="limit-row"><span style="color:var(--red)">Czerwone Bazy:</span> <input type="number" id="base_red" value="0"></div>
-            <div class="limit-row"><span style="color:#a1a1aa">Czarne Bazy:</span> <input type="number" id="base_black" value="0"></div>
-        </div>
-        
-        <div class="action-box">
-            <button class="btn-main" onclick="optimizeDraw()">PRZEWIDŹ LOS (OBLICZ)</button>
-        </div>
-    </div>
-
-    <!-- PANEL WYNIKÓW -->
     <div id="reco-section" class="result-box">
-        <div class="result-title">Sugerowana Taktyka</div>
+        <div class="res-lbl" style="margin-bottom: 10px;">Rekomendowana Ścieżka</div>
         <div id="bestCombo" class="result-combo"></div>
-        <div id="usedUpgrades" style="font-size: 10px; color: var(--purple); margin-bottom: 15px;"></div>
+        <div id="usedUpgrades" style="font-size: 11px; color: var(--purple); margin-bottom: 15px; font-weight: bold;"></div>
         <div class="result-stats">
-            <div><span class="res-lbl">Sukces</span><span id="bestSuccess" class="res-val" style="color:var(--emerald)">0%</span></div>
-            <div><span class="res-lbl">Fumble</span><span id="res-fumble-val" class="res-val" style="color:var(--red)">0%</span></div>
+            <div><span class="res-lbl">Szansa Sukcesu</span><span id="bestSuccess" class="res-val" style="color:var(--emerald)">0%</span></div>
+            <div><span class="res-lbl">Ryzyko Fumble</span><span id="res-fumble-val" class="res-val" style="color:var(--red)">0%</span></div>
         </div>
     </div>
+
+    <div class="decks-grid" id="deck-selectors"></div>
+
 </div>
 
 <script>
@@ -386,13 +341,8 @@
     function toggleCard(color, idx) {
         const btn = document.getElementById(`btn-${color}-${idx}`);
         const pos = selectedDiscard[color].indexOf(idx);
-        if (pos > -1) {
-            selectedDiscard[color].splice(pos, 1);
-            btn.classList.remove('is-discarded');
-        } else {
-            selectedDiscard[color].push(idx);
-            btn.classList.add('is-discarded');
-        }
+        if (pos > -1) { selectedDiscard[color].splice(pos, 1); btn.classList.remove('is-discarded'); } 
+        else { selectedDiscard[color].push(idx); btn.classList.add('is-discarded'); }
         updateDeckStats(color);
     }
 
@@ -411,11 +361,8 @@
         let deck = [];
         DECKS_SCHEMA[color].cards.forEach((val, idx) => {
             if (!selectedDiscard[color].includes(idx)) {
-                if (typeof val === 'string') {
-                    deck.push({val: parseInt(val.substring(1)), crit: true});
-                } else {
-                    deck.push({val: val, crit: false});
-                }
+                if (typeof val === 'string') deck.push({val: parseInt(val.substring(1)), crit: true});
+                else deck.push({val: val, crit: false});
             }
         });
         return deck;
@@ -439,7 +386,6 @@
         for (let i = 0; i < iterations; i++) {
             let decks = { white: getLiveDeck('white'), yellow: getLiveDeck('yellow'), red: getLiveDeck('red'), black: getLiveDeck('black') };
             let score = 0, zeros = 0, currentSwaps = swaps;
-
             for (let color in plan) {
                 for (let j = 0; j < plan[color]; j++) {
                     let d = drawFromLive(decks[color]);
@@ -494,10 +440,11 @@
             let t = [];
             for(let c in best.combo) if(best.combo[c]>0) t.push(`${best.combo[c]}x ${c==='white'?'Biała':c==='yellow'?'Żółta':c==='red'?'Czerwona':'Czarna'}`);
             document.getElementById('bestCombo').innerText = t.join(' + ');
-            document.getElementById('usedUpgrades').innerText = `Użyto ${best.cost} / ${maxLvl} pkt ulepszeń`;
+            document.getElementById('usedUpgrades').innerText = `WYKORZYSTANO ${best.cost} / ${maxLvl} PKT ULEPSZEŃ`;
             document.getElementById('bestSuccess').innerText = (best.succ * 100).toFixed(1) + "%";
             document.getElementById('res-fumble-val').innerText = (best.fumb * 100).toFixed(1) + "%";
             document.getElementById('reco-section').style.display = 'block';
+            document.getElementById('reco-section').scrollIntoView({ behavior: 'smooth' });
         }
     }
 
