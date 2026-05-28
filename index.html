@@ -3,83 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oathsworn Tactical Assistant v6</title>
+    <title>Oathsworn Deepwood Companion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .pool-input { @apply w-14 text-center border-2 border-gray-300 rounded-lg p-1 font-bold; }
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;700;900&display=swap');
         
-        /* Style kart dostępnych */
-        .card-btn { @apply rounded-md p-2 text-xs font-black transition-all border-2 flex flex-col items-center justify-center min-w-[38px] shadow-sm; }
-        .card-white { @apply bg-white border-gray-300 text-gray-700; }
-        .card-yellow { @apply bg-amber-400 border-amber-500 text-amber-900; }
-        .card-red { @apply bg-red-600 border-red-700 text-white; }
-        .card-black { @apply bg-gray-900 border-black text-gray-100; }
+        .font-fantasy { font-family: 'Cinzel', serif; }
+        body { font-family: 'Inter', sans-serif; }
 
-        /* Styl karty odrzuconej (Discard) */
-        .card-discarded { 
-            @apply opacity-20 grayscale scale-90 border-dashed border-gray-400 !bg-gray-200 !text-gray-400 shadow-none;
-            text-decoration: line-through;
+        .pool-input { @apply w-14 text-center border-2 border-zinc-700 bg-zinc-900 rounded-lg p-1 font-black text-amber-500 focus:border-amber-600 focus:outline-none text-base; }
+        
+        /* Styl prawdziwej karty planszowej (Pionowy prostokąt) */
+        .card-btn { 
+            @apply rounded-lg p-2 text-xs font-black transition-all duration-300 border-2 
+            flex flex-col items-center justify-between h-20 w-14 shadow-lg transform active:scale-95 relative overflow-hidden;
         }
+        
+        /* Aktywne kolory talii */
+        .card-white { @apply bg-stone-100 border-stone-400 text-stone-900; }
+        .card-yellow { @apply bg-gradient-to-b from-amber-500 to-amber-600 border-amber-400 text-stone-950; }
+        .card-red { @apply bg-gradient-to-b from-red-700 to-red-800 border-red-600 text-stone-100; }
+        .card-black { @apply bg-gradient-to-b from-zinc-800 to-zinc-950 border-zinc-700 text-amber-500; }
 
-        .deck-container { @apply bg-white p-4 rounded-2xl border border-gray-200 shadow-sm mb-4; }
+        /* WIZUALNY DISCARD: Efekt wypalonej/zniszczonej karty z czaszką */
+        .card-discarded { 
+            @apply !bg-gradient-to-br !from-stone-900 !to-neutral-950 !border-red-900/80 !text-red-700/40 scale-95 shadow-none;
+            line-through;
+        }
+        
+        /* Nakładka z czaszką widoczna TYLKO na odrzuconej karcie */
+        .skull-overlay { @apply absolute inset-0 flex items-center justify-center text-red-600/20 text-2xl opacity-0 transition-opacity duration-300 pointer-events-none font-sans; }
+        .card-discarded .skull-overlay { @apply opacity-100; }
+
+        .deck-container { @apply bg-zinc-900/40 p-4 rounded-2xl border border-zinc-800/80 shadow-2xl backdrop-blur-sm mb-4; }
+        
+        .glow-green { box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
+        .glow-amber { box-shadow: 0 0 15px rgba(245, 158, 11, 0.15); }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen p-4 font-sans text-gray-900">
+<body class="bg-stone-950 text-stone-200 min-h-screen p-4 antialiased">
     <div class="max-w-2xl mx-auto">
-        <header class="text-center mb-6">
-            <h1 class="text-3xl font-black text-gray-800 tracking-tight">🛡️ OATHSWORN HELPER</h1>
-            <p class="text-gray-500 text-sm font-medium">Zarządzanie talią i optymalizacja testów</p>
+        
+        <!-- NAGŁÓWEK -->
+        <header class="text-center mb-6 pt-4">
+            <h1 class="text-3xl font-black tracking-widest text-amber-500 font-fantasy border-b border-zinc-800 pb-2 inline-block px-6">OATHSWORN</h1>
+            <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-2 font-fantasy">Tactical Deepwood Assistant</p>
         </header>
         
+        <!-- PANEL STEROWANIA -->
         <div class="grid grid-cols-3 gap-3 mb-6">
-            <div class="bg-white p-3 rounded-2xl border shadow-sm text-center">
-                <label class="block text-[10px] font-black uppercase text-gray-400 mb-1">Cel (X)</label>
-                <input type="number" id="targetX" value="6" class="w-full text-2xl font-black text-indigo-600 outline-none">
+            <div class="bg-zinc-900/80 p-3 rounded-xl border border-zinc-800 text-center shadow-lg">
+                <label class="block text-[10px] font-black uppercase tracking-wider text-zinc-500 mb-1 font-fantasy">Cel Testu (X)</label>
+                <input type="number" id="targetX" value="6" class="w-full bg-transparent text-2xl font-black text-amber-500 text-center outline-none font-fantasy">
             </div>
-            <div class="bg-white p-3 rounded-2xl border shadow-sm text-center">
-                <label class="block text-[10px] font-black uppercase text-gray-400 mb-1">Upgrady ⭐</label>
-                <input type="number" id="upgrade_tokens" value="1" class="w-full text-2xl font-black text-purple-600 outline-none">
+            <div class="bg-zinc-900/80 p-3 rounded-xl border border-zinc-800 text-center shadow-lg">
+                <label class="block text-[10px] font-black uppercase tracking-wider text-zinc-500 mb-1 font-fantasy">Upgrady ⭐</label>
+                <input type="number" id="upgrade_tokens" value="1" class="w-full bg-transparent text-2xl font-black text-purple-400 text-center outline-none font-fantasy">
             </div>
-            <div class="bg-white p-3 rounded-2xl border shadow-sm text-center">
-                <label class="block text-[10px] font-black uppercase text-gray-400 mb-1">Wymiany 🔄</label>
-                <input type="number" id="swap_tokens" value="1" class="w-full text-2xl font-black text-orange-500 outline-none">
+            <div class="bg-zinc-900/80 p-3 rounded-xl border border-zinc-800 text-center shadow-lg">
+                <label class="block text-[10px] font-black uppercase tracking-wider text-zinc-500 mb-1 font-fantasy">Wymiany 🔄</label>
+                <input type="number" id="swap_tokens" value="1" class="w-full bg-transparent text-2xl font-black text-orange-400 text-center outline-none font-fantasy">
             </div>
         </div>
 
+        <!-- SEKCJA TALII -->
         <div class="flex justify-between items-end mb-3 px-1">
-            <h2 class="text-sm font-black uppercase text-gray-600">🗃️ Stan Twoich Talii</h2>
-            <button onclick="resetAllDiscards()" class="text-[10px] bg-red-500 text-white font-bold px-3 py-1 rounded-full shadow-sm hover:bg-red-600 transition">PRZETASUJ WSZYSTKO</button>
+            <h2 class="text-xs font-black uppercase tracking-widest text-zinc-400 font-fantasy">🔮 Aktywne talie (Kliknij kartę by odrzucić)</h2>
+            <button onclick="resetAllDiscards()" class="text-[9px] bg-zinc-900 hover:bg-zinc-800 text-amber-500 font-bold px-3 py-1.5 rounded border border-zinc-700 tracking-wider font-fantasy transition">WTASUJ KARTY Z POWROTEM</button>
         </div>
 
         <div id="deck-selectors" class="space-y-4 mb-6"></div>
 
-        <div class="bg-slate-800 p-5 rounded-2xl text-white mb-6 shadow-lg">
-            <h3 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest text-center">Limity doboru w tym teście</h3>
+        <!-- LIMIT DOBORU -->
+        <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl mb-6 shadow-2xl relative overflow-hidden">
+            <h3 class="text-xs font-black uppercase text-zinc-400 mb-4 tracking-widest text-center font-fantasy">Dopuszczalne limity kart w tej turze</h3>
             <div class="grid grid-cols-2 gap-4">
-                <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Max Białych</span><input type="number" id="max_white" value="5" class="bg-slate-700 rounded-lg p-2 font-black text-white border-none mt-1"></div>
-                <div class="flex flex-col"><span class="text-[10px] font-bold text-amber-400 uppercase ml-1">Żółte Bazy</span><input type="number" id="base_yellow" value="0" class="bg-slate-700 rounded-lg p-2 font-black text-white border-none mt-1"></div>
-                <div class="flex flex-col"><span class="text-[10px] font-bold text-red-400 uppercase ml-1">Czerwone Bazy</span><input type="number" id="base_red" value="0" class="bg-slate-700 rounded-lg p-2 font-black text-white border-none mt-1"></div>
-                <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-300 uppercase ml-1">Czarne Bazy</span><input type="number" id="base_black" value="0" class="bg-slate-700 rounded-lg p-2 font-black text-white border-none mt-1"></div>
+                <div class="flex flex-col"><span class="text-[10px] font-bold text-zinc-500 uppercase ml-1 font-fantasy">Max Białych</span><input type="number" id="max_white" value="5" class="pool-input w-full mt-1"></div>
+                <div class="flex flex-col"><span class="text-[10px] font-bold text-amber-500 uppercase ml-1 font-fantasy">Żółte Bazy</span><input type="number" id="base_yellow" value="0" class="pool-input w-full mt-1"></div>
+                <div class="flex flex-col"><span class="text-[10px] font-bold text-red-500 uppercase ml-1 font-fantasy">Czerwone Bazy</span><input type="number" id="base_red" value="0" class="pool-input w-full mt-1"></div>
+                <div class="flex flex-col"><span class="text-[10px] font-bold text-zinc-400 uppercase ml-1 font-fantasy">Czarne Bazy</span><input type="number" id="base_black" value="0" class="pool-input w-full mt-1"></div>
             </div>
         </div>
 
-        <button onclick="optimizeDraw()" class="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-indigo-700 transition active:scale-[0.98] text-lg mb-8">
-            ANALIZUJ NAJLEPSZY RUCH
+        <!-- PRZYCISK AKCJI -->
+        <button onclick="optimizeDraw()" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-stone-950 font-black py-4 rounded-xl shadow-xl hover:from-amber-500 hover:to-amber-600 transition duration-300 font-fantasy text-lg tracking-wider mb-8 glow-amber">
+            PRZEWIDŹ LOS (OBLICZ)
         </button>
 
+        <!-- WYNIK REKOMENDACJI -->
         <div id="reco-section" class="hidden mb-12">
-            <div class="bg-white p-6 rounded-3xl border-2 border-green-500 shadow-2xl overflow-hidden relative">
-                <div class="absolute top-0 right-0 bg-green-500 text-white px-4 py-1 rounded-bl-xl text-[10px] font-black uppercase">Rekomendacja</div>
-                <p id="bestCombo" class="text-2xl font-black text-gray-800 mb-2"></p>
-                <p id="usedUpgrades" class="text-xs font-bold text-purple-600 mb-4"></p>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-green-50 p-3 rounded-xl border border-green-100 text-center">
-                        <span class="block text-[10px] font-bold text-green-600 uppercase">Szansa Sukcesu</span>
-                        <span id="bestSuccess" class="text-3xl font-black text-green-700">0%</span>
+            <div class="bg-zinc-900 p-6 rounded-2xl border-2 border-emerald-600 shadow-2xl overflow-hidden relative glow-green">
+                <div class="absolute top-0 right-0 bg-emerald-600 text-stone-950 px-4 py-1 rounded-bl-xl text-[10px] font-black uppercase tracking-widest font-fantasy">Rekomendacja</div>
+                
+                <p class="text-[10px] uppercase font-bold text-zinc-500 tracking-wider font-fantasy mb-1">Najbezpieczniejsza ścieżka</p>
+                <p id="bestCombo" class="text-2xl font-black text-amber-400 font-fantasy my-1 tracking-wide"></p>
+                <p id="usedUpgrades" class="text-[11px] font-bold text-purple-400 opacity-90 mt-1"></p>
+                
+                <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-zinc-800">
+                    <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 text-center">
+                        <span class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-fantasy">Szansa Sukcesu</span>
+                        <span id="bestSuccess" class="text-3xl font-black text-emerald-500 font-fantasy">0%</span>
                     </div>
-                    <div class="bg-red-50 p-3 rounded-xl border border-red-100 text-center">
-                        <span class="block text-[10px] font-bold text-red-600 uppercase">Ryzyko Fumble</span>
-                        <span id="bestFumble" class="text-3xl font-black text-red-700">0%</span>
+                    <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 text-center">
+                        <span class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-fantasy">Ryzyko Fumble</span>
+                        <span id="bestFumble" class="text-3xl font-black text-red-500 font-fantasy">0%</span>
                     </div>
                 </div>
             </div>
@@ -88,10 +115,10 @@
 
     <script>
         const DECKS_SCHEMA = {
-            white:  {name: 'Biała', colorClass: 'card-white', cards: [0,0,0,0,0,0, 1,1,1,1,1,1, 2,2,2,2, 'K1','K1']},
-            yellow: {name: 'Żółta', colorClass: 'card-yellow', cards: [0,0,0,0, 1,1,1,1, 2,2,2,2, 3,3,3,3, 'K2','K2']},
-            red:    {name: 'Czerwona', colorClass: 'card-red', cards: [0,0, 2,2,2,2, 3,3,3,3,3,3, 4,4,4,4, 'K3','K3']},
-            black:  {name: 'Czarna', colorClass: 'card-black', cards: [0,0, 3,3,3,3, 4,4,4,4,4,4, 5,5,5,5, 'K4','K4']}
+            white:  {name: 'Talia Biała', colorClass: 'card-white', cards: [0,0,0,0,0,0, 1,1,1,1,1,1, 2,2,2,2, 'K1','K1']},
+            yellow: {name: 'Talia Żółta', colorClass: 'card-yellow', cards: [0,0,0,0, 1,1,1,1, 2,2,2,2, 3,3,3,3, 'K2','K2']},
+            red:    {name: 'Talia Czerwona', colorClass: 'card-red', cards: [0,0, 2,2,2,2, 3,3,3,3,3,3, 4,4,4,4, 'K3','K3']},
+            black:  {name: 'Talia Czarna', colorClass: 'card-black', cards: [0,0, 3,3,3,3, 4,4,4,4,4,4, 5,5,5,5, 'K4','K4']}
         };
 
         let selectedDiscard = { white: [], yellow: [], red: [], black: [] };
@@ -100,21 +127,24 @@
             const container = document.getElementById('deck-selectors');
             container.innerHTML = '';
             for (let color in DECKS_SCHEMA) {
+                let colorLabelClass = color === 'white' ? 'text-zinc-400' : (color === 'yellow' ? 'text-amber-500' : (color === 'red' ? 'text-red-500' : 'text-stone-400'));
                 let html = `<div class="deck-container">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="font-black text-sm uppercase tracking-wider ${color === 'white' ? 'text-gray-600' : DECKS_SCHEMA[color].colorClass.replace('bg-','text-')}">${DECKS_SCHEMA[color].name}</span>
-                        <div class="text-[10px] font-bold px-2 py-0.5 bg-gray-100 rounded text-gray-500">
-                            ZER: <span id="zeros-${color}">?</span> | SUMA: <span id="rem-${color}">?</span>
+                    <div class="flex justify-between items-center mb-3 border-b border-zinc-800/60 pb-1">
+                        <span class="font-black text-xs uppercase tracking-widest font-fantasy ${colorLabelClass}">${DECKS_SCHEMA[color].name}</span>
+                        <div class="text-[9px] font-bold px-2 py-0.5 bg-zinc-950 rounded text-zinc-500 tracking-wider font-fantasy border border-zinc-800">
+                            ZER: <span id="zeros-${color}" class="text-red-500">?</span> | KART: <span id="rem-${color}" class="text-zinc-300">?</span>
                         </div>
                     </div>
-                    <div class="flex flex-wrap gap-2">`;
+                    <div class="flex flex-wrap gap-1.5 justify-start">`;
                 
                 DECKS_SCHEMA[color].cards.forEach((val, idx) => {
                     const isCrit = typeof val === 'string';
                     html += `<button id="btn-${color}-${idx}" onclick="toggleCard('${color}', ${idx})" 
                         class="card-btn ${DECKS_SCHEMA[color].colorClass} ${selectedDiscard[color].includes(idx) ? 'card-discarded' : ''}">
-                        <span class="text-lg">${val === 0 ? '0' : (isCrit ? '★' : val)}</span>
-                        <span class="text-[7px] uppercase opacity-60">${isCrit ? val : 'pkt'}</span>
+                        <div class="skull-overlay">☠</div>
+                        <span class="text-xs uppercase opacity-40 tracking-tighter self-start">${isCrit ? 'crit' : 'value'}</span>
+                        <span class="text-xl font-fantasy font-black">${val === 0 ? '0' : (isCrit ? '★' : val)}</span>
+                        <span class="text-[8px] font-fantasy font-bold opacity-60 self-end">${isCrit ? val : val + ' pts'}</span>
                     </button>`;
                 });
                 html += `</div></div>`;
@@ -235,7 +265,7 @@
                 let t = [];
                 for(let c in best.combo) if(best.combo[c]>0) t.push(`${best.combo[c]}x ${c==='white'?'Biała':c==='yellow'?'Żółta':c==='red'?'Czerwona':'Czarna'}`);
                 document.getElementById('bestCombo').innerText = t.join(' + ');
-                document.getElementById('usedUpgrades').innerText = `Wykorzystano ${best.cost} pkt ulepszeń`;
+                document.getElementById('usedUpgrades').innerText = `Użyto ${best.cost} / ${maxLvl} punktów ulepszeń`;
                 document.getElementById('bestSuccess').innerText = (best.succ * 100).toFixed(1) + "%";
                 document.getElementById('bestFumble').innerText = (best.fumb * 100).toFixed(1) + "%";
                 document.getElementById('reco-section').classList.remove('hidden');
