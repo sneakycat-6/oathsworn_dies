@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oathsworn Tactical Assistant v6</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .pool-input { @apply w-14 text-center border-2 border-gray-300 rounded-lg p-1 font-bold; }
+        
+        /* Style kart dostępnych */
+        .card-btn { @apply rounded-md p-2 text-xs font-black transition-all border-2 flex flex-col items-center justify-center min-w-[38px] shadow-sm; }
+        .card-white { @apply bg-white border-gray-300 text-gray-700; }
+        .card-yellow { @apply bg-amber-400 border-amber-500 text-amber-900; }
+        .card-red { @apply bg-red-600 border-red-700 text-white; }
+        .card-black { @apply bg-gray-900 border-black text-gray-100; }
+
+        /* Styl karty odrzuconej (Discard) */
+        .card-discarded { 
+            @apply opacity-20 grayscale scale-90 border-dashed border-gray-400 !bg-gray-200 !text-gray-400 shadow-none;
+            text-decoration: line-through;
+        }
+
+        .deck-container { @apply bg-white p-4 rounded-2xl border border-gray-200 shadow-sm mb-4; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-4 font-sans text-gray-900">
+    <div class="max-w-2xl mx-auto">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-black text-gray-800 tracking-tight">🛡️ OATHSWORN HELPER</h1>
+            <p class="text-gray-500 text-sm font-medium">Zarządzanie talią i optymalizacja testów</p>
+        </header>
+        
+        <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="bg-white p-3 rounded-2xl border shadow-sm text-center">
+                <label class="block text-[10px] font-black uppercase text-gray-400 mb-1">Cel (X)</label>
+                <input type="number" id="targetX" value="6" class="w-full text-2xl font-black text-indigo-600 outline-none">
+            </div>
+            <div class="bg-white p-3 rounded-2xl border shadow-sm text-center">
+                <label class="block text-[10px] font-black uppercase text-gray-400 mb-1">Upgrady ⭐</label>
+                <input type="number" id="upgrade_tokens" value="1" class="w-full text-2xl font-black text-purple-600 outline-none">
+            </div>
+            <div class="bg-white p-3 rounded-2xl border shadow-sm text-center">
+                <label class="block text-[10px] font-black uppercase text-gray-400 mb-1">Wymiany 🔄</label>
+                <input type="number" id="swap_tokens" value="1" class="w-full text-2xl font-black text-orange-500 outline-none">
+            </div>
+        </div>
+
+        <div class="flex justify-between items-end mb-3 px-1">
+            <h2 class="text-sm font-black uppercase text-gray-600">🗃️ Stan Twoich Talii</h2>
+            <button onclick="resetAllDiscards()" class="text-[10px] bg-red-500 text-white font-bold px-3 py-1 rounded-full shadow-sm hover:bg-red-600 transition">PRZETASUJ WSZYSTKO</button>
+        </div>
+
+        <div id="deck-selectors" class="space-y-4 mb-6"></div>
+
+        <div class="bg-slate-800 p-5 rounded-2xl text-white mb-6 shadow-lg">
+            <h3 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest text-center">Limity doboru w tym teście</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Max Białych</span><input type="number" id="max_white" value="5" class="bg-slate-700 rounded-lg p-2 font-black text-white border-none mt-1"></div>
+                <div class="flex flex-col"><span class="text-[10px] font-bold text-amber-400 uppercase ml-1">Żółte Bazy</span><input type="number" id="base_yellow" value="0" class="bg-slate-700 rounded-lg p-2 font-black text-white border-none mt-1"></div>
+                <div class="flex flex-col"><span class="text-[10px] font-bold text-red-400 uppercase ml-1">Czerwone Bazy</span><input type="number" id="base_red" value="0" class="bg-slate-700 rounded-lg p-2 font-black text-white border-none mt-1"></div>
+                <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-300 uppercase ml-1">Czarne Bazy</span><input type="number" id="base_black" value="0" class="bg-slate-700 rounded-lg p-2 font-black text-white border-none mt-1"></div>
+            </div>
+        </div>
+
+        <button onclick="optimizeDraw()" class="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-indigo-700 transition active:scale-[0.98] text-lg mb-8">
+            ANALIZUJ NAJLEPSZY RUCH
+        </button>
+
+        <div id="reco-section" class="hidden mb-12">
+            <div class="bg-white p-6 rounded-3xl border-2 border-green-500 shadow-2xl overflow-hidden relative">
+                <div class="absolute top-0 right-0 bg-green-500 text-white px-4 py-1 rounded-bl-xl text-[10px] font-black uppercase">Rekomendacja</div>
+                <p id="bestCombo" class="text-2xl font-black text-gray-800 mb-2"></p>
+                <p id="usedUpgrades" class="text-xs font-bold text-purple-600 mb-4"></p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-green-50 p-3 rounded-xl border border-green-100 text-center">
+                        <span class="block text-[10px] font-bold text-green-600 uppercase">Szansa Sukcesu</span>
+                        <span id="bestSuccess" class="text-3xl font-black text-green-700">0%</span>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-xl border border-red-100 text-center">
+                        <span class="block text-[10px] font-bold text-red-600 uppercase">Ryzyko Fumble</span>
+                        <span id="bestFumble" class="text-3xl font-black text-red-700">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DECKS_SCHEMA = {
+            white:  {name: 'Biała', colorClass: 'card-white', cards: [0,0,0,0,0,0, 1,1,1,1,1,1, 2,2,2,2, 'K1','K1']},
+            yellow: {name: 'Żółta', colorClass: 'card-yellow', cards: [0,0,0,0, 1,1,1,1, 2,2,2,2, 3,3,3,3, 'K2','K2']},
+            red:    {name: 'Czerwona', colorClass: 'card-red', cards: [0,0, 2,2,2,2, 3,3,3,3,3,3, 4,4,4,4, 'K3','K3']},
+            black:  {name: 'Czarna', colorClass: 'card-black', cards: [0,0, 3,3,3,3, 4,4,4,4,4,4, 5,5,5,5, 'K4','K4']}
+        };
+
+        let selectedDiscard = { white: [], yellow: [], red: [], black: [] };
+
+        function initUI() {
+            const container = document.getElementById('deck-selectors');
+            container.innerHTML = '';
+            for (let color in DECKS_SCHEMA) {
+                let html = `<div class="deck-container">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-black text-sm uppercase tracking-wider ${color === 'white' ? 'text-gray-600' : DECKS_SCHEMA[color].colorClass.replace('bg-','text-')}">${DECKS_SCHEMA[color].name}</span>
+                        <div class="text-[10px] font-bold px-2 py-0.5 bg-gray-100 rounded text-gray-500">
+                            ZER: <span id="zeros-${color}">?</span> | SUMA: <span id="rem-${color}">?</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2">`;
+                
+                DECKS_SCHEMA[color].cards.forEach((val, idx) => {
+                    const isCrit = typeof val === 'string';
+                    html += `<button id="btn-${color}-${idx}" onclick="toggleCard('${color}', ${idx})" 
+                        class="card-btn ${DECKS_SCHEMA[color].colorClass} ${selectedDiscard[color].includes(idx) ? 'card-discarded' : ''}">
+                        <span class="text-lg">${val === 0 ? '0' : (isCrit ? '★' : val)}</span>
+                        <span class="text-[7px] uppercase opacity-60">${isCrit ? val : 'pkt'}</span>
+                    </button>`;
+                });
+                html += `</div></div>`;
+                container.innerHTML += html;
+                updateDeckStats(color);
+            }
+        }
+
+        function toggleCard(color, idx) {
+            const btn = document.getElementById(`btn-${color}-${idx}`);
+            const isSelected = selectedDiscard[color].includes(idx);
+            
+            if (isSelected) {
+                selectedDiscard[color] = selectedDiscard[color].filter(i => i !== idx);
+                btn.classList.remove('card-discarded');
+            } else {
+                selectedDiscard[color].push(idx);
+                btn.classList.add('card-discarded');
+            }
+            updateDeckStats(color);
+        }
+
+        function updateDeckStats(color) {
+            const live = getLiveDeck(color);
+            document.getElementById(`rem-${color}`).innerText = live.length;
+            document.getElementById(`zeros-${color}`).innerText = live.filter(c => c.val === 0).length;
+        }
+
+        function resetAllDiscards() {
+            for (let color in selectedDiscard) selectedDiscard[color] = [];
+            initUI();
+        }
+
+        function getLiveDeck(color) {
+            let deck = [];
+            DECKS_SCHEMA[color].cards.forEach((val, idx) => {
+                if (!selectedDiscard[color].includes(idx)) {
+                    if (typeof val === 'string') {
+                        let critVal = parseInt(val.substring(1));
+                        deck.push({val: critVal, crit: true});
+                    } else {
+                        deck.push({val: val, crit: false});
+                    }
+                }
+            });
+            return deck;
+        }
+
+        function drawFromLive(deck, isCritDraw = false) {
+            if (deck.length === 0) return { score: 0, zeros: 0 };
+            let idx = Math.floor(Math.random() * deck.length);
+            let card = deck.splice(idx, 1)[0];
+            let res = { score: card.val, zeros: (card.val === 0 && !isCritDraw) ? 1 : 0 };
+            if (card.crit) {
+                let next = drawFromLive(deck, true);
+                res.score += next.score;
+                res.zeros += next.zeros;
+            }
+            return res;
+        }
+
+        function evaluatePlan(plan, target, swaps, iterations = 2500) {
+            let successes = 0, fumbles = 0;
+            for (let i = 0; i < iterations; i++) {
+                let decks = { white: getLiveDeck('white'), yellow: getLiveDeck('yellow'), red: getLiveDeck('red'), black: getLiveDeck('black') };
+                let score = 0, zeros = 0, currentSwaps = swaps;
+
+                for (let color in plan) {
+                    for (let j = 0; j < plan[color]; j++) {
+                        let d = drawFromLive(decks[color]);
+                        if (d.zeros > 0 && currentSwaps > 0) { currentSwaps--; d = drawFromLive(decks[color]); }
+                        else if (d.score <= 1 && currentSwaps > 0 && target - score > 2) { currentSwaps--; d = drawFromLive(decks[color]); }
+                        score += d.score; zeros += d.zeros;
+                    }
+                }
+                if (zeros >= 2) fumbles++; else if (score >= target) successes++;
+            }
+            return { succ: successes / iterations, fumb: fumbles / iterations };
+        }
+
+        function optimizeDraw() {
+            const target = parseInt(document.getElementById('targetX').value);
+            const tokens = parseInt(document.getElementById('upgrade_tokens').value);
+            const swaps = parseInt(document.getElementById('swap_tokens').value);
+            const maxLvl = tokens * 3;
+            const config = {
+                limitW: parseInt(document.getElementById('max_white').value),
+                baseY: parseInt(document.getElementById('base_yellow').value),
+                baseR: parseInt(document.getElementById('base_red').value),
+                baseB: parseInt(document.getElementById('base_black').value)
+            };
+
+            let best = { combo: null, succ: -1, fumb: 2, cost: 99 };
+
+            for (let wBase = 1; wBase <= config.limitW; wBase++) {
+                let totalCards = wBase + config.baseY + config.baseR + config.baseB;
+                for (let w = 0; w <= totalCards; w++) {
+                    for (let y = 0; y <= totalCards - w; y++) {
+                        for (let r = 0; r <= totalCards - w - y; r++) {
+                            let b = totalCards - w - y - r;
+                            if (w+y+r+b !== totalCards) continue;
+                            let baseArr = [].concat(Array(wBase).fill(0), Array(config.baseY).fill(1), Array(config.baseR).fill(2), Array(config.baseB).fill(3));
+                            let testArr = [].concat(Array(w).fill(0), Array(y).fill(1), Array(r).fill(2), Array(b).fill(3));
+                            let cost = 0; let valid = true;
+                            for(let i=0; i<totalCards; i++) { if (testArr[i] < baseArr[i]) { valid = false; break; } cost += (testArr[i] - baseArr[i]); }
+                            if (valid && cost <= maxLvl) {
+                                let res = evaluatePlan({ white: w, yellow: y, red: r, black: b }, target, swaps);
+                                if (res.succ > best.succ || (Math.abs(res.succ - best.succ) < 0.01 && res.fumb < best.fumb)) {
+                                    best = { combo: { white: w, yellow: y, red: r, black: b }, succ: res.succ, fumb: res.fumb, cost: cost };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (best.combo) {
+                let t = [];
+                for(let c in best.combo) if(best.combo[c]>0) t.push(`${best.combo[c]}x ${c==='white'?'Biała':c==='yellow'?'Żółta':c==='red'?'Czerwona':'Czarna'}`);
+                document.getElementById('bestCombo').innerText = t.join(' + ');
+                document.getElementById('usedUpgrades').innerText = `Wykorzystano ${best.cost} pkt ulepszeń`;
+                document.getElementById('bestSuccess').innerText = (best.succ * 100).toFixed(1) + "%";
+                document.getElementById('bestFumble').innerText = (best.fumb * 100).toFixed(1) + "%";
+                document.getElementById('reco-section').classList.remove('hidden');
+                document.getElementById('reco-section').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        window.onload = initUI;
+    </script>
+</body>
+</html>
